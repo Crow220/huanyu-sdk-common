@@ -13,13 +13,13 @@
 | 参数 | 类型 | 必填 | 说明 |
 |---|---|---|---|
 | order_type | int | 必填 | 1=买入 2=卖出 |
-| payment_amount | number | 必填 | 订单金额 |
+| cny_amount | number | 必填 | CNY 金额，大于 0 |
 | payment_method | object | 卖单必填 | `{bank, sub_bank, card_number, real_name}` |
 | customer_name | string | 视配置 | 三要素之一，是否必填由商户 identity_required 配置决定 |
 | id_card | string | 视配置 | 三要素之一，同上 |
 | mobile | string | 视配置 | 三要素之一，同上 |
 | remark | string | 选填 | 备注 |
-| merchant_order_no | string | 选填 | 限长255（商户保证唯一，平台不去重） |
+| merchant_order_no | string | 选填 | 限长255；**商户内唯一**（同商户重复单号建单返回错误，不同商户间可重复） |
 
 成功 data 含 result_status: `success` | `pending_identity`（后者附 identity_url，用于引导补全客户身份信息）。
 

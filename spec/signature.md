@@ -31,7 +31,7 @@
 | timestamp | `1756617600` |
 | nonce | `Ab3dEf7hIj9kLm2n` |
 | order_type | `2` |
-| payment_amount | `100.50` |
+| cny_amount | `100.50` |
 | payment_method | `{"bank":"中国银行","sub_bank":"深圳分行","card_number":"6222021234567890","real_name":"张三"}` |
 | remark | `""`（空字符串，**跳过不参与签名**） |
 | api_secret | `sk_test_456` |
@@ -39,16 +39,16 @@
 待签名字符串（按键名 ASCII 升序，`remark` 被跳过）：
 
 ```text
-api_key=mk_test_123&nonce=Ab3dEf7hIj9kLm2n&order_type=2&payment_amount=100.50&payment_method={"bank":"中国银行","sub_bank":"深圳分行","card_number":"6222021234567890","real_name":"张三"}&timestamp=1756617600&api_secret=sk_test_456
+api_key=mk_test_123&cny_amount=100.50&nonce=Ab3dEf7hIj9kLm2n&order_type=2&payment_method={"bank":"中国银行","sub_bank":"深圳分行","card_number":"6222021234567890","real_name":"张三"}&timestamp=1756617600&api_secret=sk_test_456
 ```
 
-签名：`EA2912CBC4294DDB7986E246F04FB4E5`
+签名：`09F7AD2E01E729A28E88E39D58C0B74C`
 
-注意 `payment_amount` 以字符串 `100.50` 参与——若以浮点数传入，部分语言会序列化成 `100.5`，导致签名不一致（见第 2 步最后一条要求）。拼接一律使用**原始值**，不做 URL 编码（HTTP 传输层的编码行为不影响签名计算）。
+注意 `cny_amount` 以字符串 `100.50` 参与——若以浮点数传入，部分语言会序列化成 `100.5`，导致签名不一致（见第 2 步最后一条要求）。拼接一律使用**原始值**，不做 URL 编码（HTTP 传输层的编码行为不影响签名计算）。
 
 ## 回调验签（平台 → 商户）
 
-回调数据（全标量）用同一算法验签。两份后端实现的历史差异均属不可达边界：全部值为空时拼串差一个 `&`（回调数据必含非空字段，不可达）；Callback 版无数组 JSON 化分支（数组参数不在回调数据中，同样不可达）。SDK 单一实现（带数组 JSON 化）在请求签名与回调验签两个可达域内均与两份后端实现一致。详见仓库 docs/specs 设计文档"前置审计"一节。
+回调数据（全标量）用同一算法验签。两份后端实现的历史差异均属不可达边界：全部值为空时拼串差一个 `&`（回调数据必含非空字段，不可达）；Callback 版无数组 JSON 化分支（数组参数不在回调数据中，同样不可达）。SDK 单一实现（带数组 JSON 化）在请求签名与回调验签两个可达域内均与两份后端实现一致（由测试向量锁定）。
 
 验签流程：从 `application/x-www-form-urlencoded` 请求体解析出全部键值对（含 `signature`），按上文第 1–6 步重新计算签名，与收到的 `signature` 比对（建议恒时比较），一致即通过。
 
