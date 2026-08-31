@@ -1,7 +1,7 @@
 # 商户 API 规格（v1）
 
 基础 URL：https://api.pisces-pay.cn/addons/huanyu（联调可换测试环境）
-通用参数（所有请求）：api_key / timestamp(秒，±300 秒有效窗口，服务端校验) / nonce(16位) / signature
+通用参数（所有请求）：api_key / timestamp(秒，±300 秒有效窗口，服务端校验) / nonce(16位；时间窗内一次性，重复即拒绝"重复的请求，请更换 nonce 后重试") / signature
 响应信封：{code, msg, data, time}，code=1 成功。
 
 签名算法见 [signature.md](./signature.md)；本规格为四个官方 SDK（PHP / Java / Go / Python）端点方法的唯一依据，参数名与语义逐字对齐后端 `huanyu-backend/addons/huanyu/controller/Merchant.php`。
@@ -13,13 +13,13 @@
 | 参数 | 类型 | 必填 | 说明 |
 |---|---|---|---|
 | order_type | int | 必填 | 1=买入 2=卖出 |
-| payment_amount | number | 必填 | 订单金额 |
+| cny_amount | number | 必填 | CNY 金额，大于 0 |
 | payment_method | object | 卖单必填 | `{bank, sub_bank, card_number, real_name}` |
 | customer_name | string | 视配置 | 三要素之一，是否必填由商户 identity_required 配置决定 |
 | id_card | string | 视配置 | 三要素之一，同上 |
 | mobile | string | 视配置 | 三要素之一，同上 |
 | remark | string | 选填 | 备注 |
-| merchant_order_no | string | 选填 | 限长255（商户保证唯一，平台不去重） |
+| merchant_order_no | string | 选填 | 限长255；**商户内唯一**（同商户重复单号建单返回错误，不同商户间可重复） |
 
 成功 data 含 result_status: `success` | `pending_identity`（后者附 identity_url，用于引导补全客户身份信息）。
 
