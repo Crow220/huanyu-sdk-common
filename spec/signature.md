@@ -3,7 +3,7 @@
 本文件是寰宇（PISCES）商户平台签名算法的**语言无关真源**。四个官方 SDK（PHP / Java / Go / Python）的 `Signature` 实现必须与本规范逐步对应——下文算法步骤的**编号即契约**：SDK 实现注释、测试向量说明均引用这些编号，调整步骤或编号必须四仓同步并更新测试向量。
 
 - 提炼来源（权威参考实现）：`huanyu-backend/addons/huanyu/library/MerchantAuth.php`（请求签名/验签）、`huanyu-backend/addons/huanyu/service/Callback.php`（回调签名）。
-- 期望值真源：`vectors/signature_vectors.json`（请求签名）与 `vectors/callback_vectors.json`（回调验签），由 `tools/generate-vectors.php` 直接调用后端参考实现生成（向量由后续任务填充）。本文示例仅为说明用途，若与向量冲突，以向量为准。
+- 期望值真源：`vectors/signature_vectors.json`（请求签名）与 `vectors/callback_vectors.json`（回调验签），由 `tools/generate-vectors.php` 直接调用后端参考实现生成。本文示例仅为说明用途，若与向量冲突，以向量为准。
 
 ## 请求签名（商户 → 平台）
 
@@ -58,3 +58,4 @@ api_key=mk_test_123&nonce=Ab3dEf7hIj9kLm2n&order_type=2&payment_amount=100.50&pa
 - Go：`encoding/json` 对 map 按键排序输出，必须自写保序序列化（结构体字段顺序或有序键切片）；且默认把 `< > &` 转义为 `\u003c` 等，必须 `enc.SetEscapeHTML(false)`，同时显式将 `/` 替换为 `\/`。
 - Java：用 `LinkedHashMap` + Jackson（`JsonWriteFeature.ESCAPE_NON_ASCII` 禁用）；默认序列化不转义 `/`，需显式将 `/` 替换为 `\/`。
 - 排序比较是字节/ASCII 序，不是 locale 序。
+- PHP 参考实现的 `ksort` 为默认 `SORT_REGULAR`：纯数字键会被转为 int 按数值比较而非字节序；后端同此行为，可达参数域内等价，移植时保持与后端相同的排序语义即可。
