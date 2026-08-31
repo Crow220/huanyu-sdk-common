@@ -1,0 +1,59 @@
+# 签名算法规范（v1）
+
+本文件是寰宇（PISCES）商户平台签名算法的**语言无关真源**。四个官方 SDK（PHP / Java / Go / Python）的 `Signature` 实现必须与本规范逐步对应——下文算法步骤的**编号即契约**：SDK 实现注释、测试向量说明均引用这些编号，调整步骤或编号必须四仓同步并更新测试向量。
+
+- 提炼来源（权威参考实现）：`huanyu-backend/addons/huanyu/library/MerchantAuth.php`（请求签名/验签）、`huanyu-backend/addons/huanyu/service/Callback.php`（回调签名）。
+- 期望值真源：`vectors/signature_vectors.json`（请求签名）与 `vectors/callback_vectors.json`（回调验签），由 `tools/generate-vectors.php` 直接调用后端参考实现生成（向量由后续任务填充）。本文示例仅为说明用途，若与向量冲突，以向量为准。
+
+## 请求签名（商户 → 平台）
+
+输入：全部请求参数（含通用参数）+ api_secret。
+
+1. 移除 `signature` 字段本身（若存在）。
+2. 值为数组/对象的参数：JSON 序列化为字符串。要求：
+   - 键按**插入顺序**输出（不按键排序）；
+   - 分隔符无空格（`{"a":1}` 而非 `{"a": 1}`）；
+   - 非 ASCII 字符（中文等）不转义为 \uXXXX；
+   - 数字建议以字符串形式传递（与 HTTP form 传输后的真实形态一致，规避各语言浮点表示差异）。
+3. 顶层按键名升序排序（ASCII 序）。
+4. 拼接：跳过值为空字符串与 null 的参数，其余拼 `key=value&`，去掉末尾 `&`。
+5. 追加 `&api_secret=<SECRET>`。
+6. 取 MD5 并转大写。
+
+### 拼接示例
+
+以下输入（含一个数组参数、一个空字符串参数）：
+
+| 参数 | 值 |
+|---|---|
+| api_key | `mk_test_123` |
+| timestamp | `1756617600` |
+| nonce | `Ab3dEf7hIj9kLm2n` |
+| order_type | `2` |
+| payment_amount | `100.50` |
+| payment_method | `{"bank":"中国银行","sub_bank":"深圳分行","card_number":"6222021234567890","real_name":"张三"}` |
+| remark | `""`（空字符串，**跳过不参与签名**） |
+| api_secret | `sk_test_456` |
+
+待签名字符串（按键名 ASCII 升序，`remark` 被跳过）：
+
+```text
+api_key=mk_test_123&nonce=Ab3dEf7hIj9kLm2n&order_type=2&payment_amount=100.50&payment_method={"bank":"中国银行","sub_bank":"深圳分行","card_number":"6222021234567890","real_name":"张三"}&timestamp=1756617600&api_secret=sk_test_456
+```
+
+签名：`EA2912CBC4294DDB7986E246F04FB4E5`
+
+注意 `payment_amount` 以字符串 `100.50` 参与——若以浮点数传入，部分语言会序列化成 `100.5`，导致签名不一致（见第 2 步最后一条要求）。
+
+## 回调验签（平台 → 商户）
+
+回调数据（全标量）用同一算法验签。历史实现差异（不可达边界）见仓库 docs/specs 设计文档"前置审计"一节。
+
+验签流程：从 `application/x-www-form-urlencoded` 请求体解析出全部键值对（含 `signature`），按上文第 1–6 步重新计算签名，与收到的 `signature` 比对（建议恒时比较），一致即通过。
+
+## 跨语言实现注意（二期 Java/Go/Python 必读）
+
+- Python：`json.dumps(v, ensure_ascii=False, separators=(',', ':'))`；dict 3.7+ 保插入顺序。
+- Go：`encoding/json` 对 map 按键排序输出，必须自写保序序列化（结构体字段顺序或有序键切片）。
+- Java：用 `LinkedHashMap` + Jackson（`JsonWriteFeature.ESCAPE_NON_ASCII` 禁用）。
+- 排序比较是字节/ASCII 序，不是 locale 序。
