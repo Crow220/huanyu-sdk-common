@@ -1,0 +1,85 @@
+{
+    "api_secret": "test-secret-0001",
+    "cases": [
+        {
+            "id": "basic-scalars",
+            "params": {
+                "api_key": "mk_test_001",
+                "timestamp": "1756684800",
+                "nonce": "abcdefgh12345678",
+                "order_type": "1",
+                "payment_amount": "100.00",
+                "merchant_order_no": "M20260831001"
+            },
+            "expected_signature": "8B200EB108E7DBA892A3B3EC61762365"
+        },
+        {
+            "id": "chinese-values",
+            "params": {
+                "api_key": "mk_test_001",
+                "timestamp": "1756684800",
+                "nonce": "abcdefgh12345678",
+                "remark": "测试订单-加急",
+                "customer_name": "张三"
+            },
+            "expected_signature": "EF6F0F34621987335BA79876A334C5E2"
+        },
+        {
+            "id": "empty-and-null-skipped",
+            "params": {
+                "api_key": "mk_test_001",
+                "timestamp": "1756684800",
+                "nonce": "abcdefgh12345678",
+                "remark": "",
+                "extra": null,
+                "order_type": "2"
+            },
+            "expected_signature": "338A9B8546E1C84858F5D5956C8AE568"
+        },
+        {
+            "id": "array-payment-method-unsorted-keys",
+            "params": {
+                "api_key": "mk_test_001",
+                "timestamp": "1756684800",
+                "nonce": "abcdefgh12345678",
+                "order_type": "2",
+                "payment_amount": "500.50",
+                "payment_method": {
+                    "real_name": "李四",
+                    "card_number": "6217000000001234567",
+                    "bank": "中国银行",
+                    "sub_bank": "深圳分行"
+                }
+            },
+            "expected_signature": "86079594AFB2DF774DD6CA83ABECE3DD"
+        },
+        {
+            "id": "signature-field-stripped",
+            "params": {
+                "api_key": "mk_test_001",
+                "timestamp": "1756684800",
+                "nonce": "abcdefgh12345678",
+                "order_type": "1",
+                "signature": "DEADBEEFShouldBeIgnored"
+            },
+            "expected_signature": "8F44D02DF1442DBD7680FD6CE4F49704"
+        },
+        {
+            "id": "array-value-with-slash",
+            "params": {
+                "api_key": "mk_test_001",
+                "timestamp": "1756684800",
+                "nonce": "abcdefgh12345678",
+                "order_type": "2",
+                "payment_amount": "300.00",
+                "payment_method": {
+                    "bank": "工商银行",
+                    "sub_bank": "http测试支行\/分行",
+                    "card_number": "6217000000009999999",
+                    "real_name": "王五"
+                }
+            },
+            "expected_signature": "C938258B73818BF4F7FD660BD648B274"
+        }
+    ]
+}

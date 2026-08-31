@@ -1,0 +1,45 @@
+{
+    "api_secret": "test-secret-0001",
+    "cases": [
+        {
+            "id": "callback-full",
+            "params": {
+                "merchant_id": "9",
+                "order_id": "123456",
+                "order_no": "HY20260831000001",
+                "merchant_order_no": "M20260831001",
+                "order_type": "1",
+                "status": "completed",
+                "cny_amount": "100.00",
+                "merchant_amount": "99.40",
+                "merchant_actual_amount": "99.40",
+                "service_amount": "0.60",
+                "createtime": "1756684800",
+                "updatetime": "1756684900",
+                "timestamp": "1756684900",
+                "nonce": "zyxwvutsrqponmlk"
+            },
+            "expected_signature": "A0F3F2D4704067702CDE9B4F0485E486"
+        },
+        {
+            "id": "callback-empty-merchant-order-no",
+            "params": {
+                "merchant_id": "9",
+                "order_id": "123457",
+                "order_no": "HY20260831000002",
+                "merchant_order_no": "",
+                "order_type": "2",
+                "status": "completed",
+                "cny_amount": "500.50",
+                "merchant_amount": "497.70",
+                "merchant_actual_amount": "497.70",
+                "service_amount": "2.80",
+                "createtime": "1756684800",
+                "updatetime": "1756684900",
+                "timestamp": "1756684900",
+                "nonce": "zyxwvutsrqponmlk"
+            },
+            "expected_signature": "FCB5BD12F394112757A066E20A9DC45B"
+        }
+    ]
+}
