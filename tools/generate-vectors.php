@@ -51,6 +51,12 @@ $signCases = [
     'array-value-with-slash' => ['api_key' => 'mk_test_001', 'timestamp' => '1756684800', 'nonce' => 'abcdefgh12345678',
         'order_type' => '2', 'payment_amount' => '300.00',
         'payment_method' => ['bank' => '工商银行', 'sub_bank' => 'http测试支行/分行', 'card_number' => '6217000000009999999', 'real_name' => '王五']],
+    // 二期坑点：U+2028/U+2029（行/段分隔符，粘贴的收款人名等合法输入可含）即使
+    // JSON_UNESCAPED_UNICODE 也被 PHP json_encode 固有转义为 \u2028/\u2029，
+    // Go/Java 序列化器曾原样输出导致签名偏离真源被拒签——固化该行为锁定跨语言实现
+    'unicode-line-separator' => ['api_key' => 'mk_test_001', 'timestamp' => '1756684800', 'nonce' => 'abcdefgh12345678',
+        'order_type' => '2', 'payment_amount' => '200.00',
+        'payment_method' => ['bank' => '建设银行', 'sub_bank' => "深圳\u{2028}分行\u{2029}支行", 'card_number' => '6217000000007777777', 'real_name' => "测试\u{2028}用户"]],
 ];
 
 $callbackCases = [

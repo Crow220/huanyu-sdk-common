@@ -80,6 +80,23 @@
                 }
             },
             "expected_signature": "C938258B73818BF4F7FD660BD648B274"
+        },
+        {
+            "id": "unicode-line-separator",
+            "params": {
+                "api_key": "mk_test_001",
+                "timestamp": "1756684800",
+                "nonce": "abcdefgh12345678",
+                "order_type": "2",
+                "payment_amount": "200.00",
+                "payment_method": {
+                    "bank": "建设银行",
+                    "sub_bank": "深圳\u2028分行\u2029支行",
+                    "card_number": "6217000000007777777",
+                    "real_name": "测试\u2028用户"
+                }
+            },
+            "expected_signature": "126167F9C84CC617FE17500851EBF223"
         }
     ]
 }
