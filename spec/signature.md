@@ -14,6 +14,7 @@
    - 键按**插入顺序**输出（不按键排序）；
    - 分隔符无空格（`{"a":1}` 而非 `{"a": 1}`）；
    - 非 ASCII 字符（中文等）不转义为 \uXXXX；
+   - 转义集规范：正斜杠 `/` 输出为 `\/`；`< > &` 输出原始字符（不做 HTML 转义）；引号与反斜杠按 JSON 标准转义；
    - 数字建议以字符串形式传递（与 HTTP form 传输后的真实形态一致，规避各语言浮点表示差异）。
 3. 顶层按键名升序排序（ASCII 序）。
 4. 拼接：跳过值为空字符串与 null 的参数，其余拼 `key=value&`，去掉末尾 `&`。
@@ -43,7 +44,7 @@ api_key=mk_test_123&nonce=Ab3dEf7hIj9kLm2n&order_type=2&payment_amount=100.50&pa
 
 签名：`EA2912CBC4294DDB7986E246F04FB4E5`
 
-注意 `payment_amount` 以字符串 `100.50` 参与——若以浮点数传入，部分语言会序列化成 `100.5`，导致签名不一致（见第 2 步最后一条要求）。
+注意 `payment_amount` 以字符串 `100.50` 参与——若以浮点数传入，部分语言会序列化成 `100.5`，导致签名不一致（见第 2 步最后一条要求）。拼接一律使用**原始值**，不做 URL 编码（HTTP 传输层的编码行为不影响签名计算）。
 
 ## 回调验签（平台 → 商户）
 
@@ -53,7 +54,7 @@ api_key=mk_test_123&nonce=Ab3dEf7hIj9kLm2n&order_type=2&payment_amount=100.50&pa
 
 ## 跨语言实现注意（二期 Java/Go/Python 必读）
 
-- Python：`json.dumps(v, ensure_ascii=False, separators=(',', ':'))`；dict 3.7+ 保插入顺序。
-- Go：`encoding/json` 对 map 按键排序输出，必须自写保序序列化（结构体字段顺序或有序键切片）。
-- Java：用 `LinkedHashMap` + Jackson（`JsonWriteFeature.ESCAPE_NON_ASCII` 禁用）。
+- Python：`json.dumps(v, ensure_ascii=False, separators=(',', ':'))`；dict 3.7+ 保插入顺序；默认序列化不转义 `/`，需显式将 `/` 替换为 `\/`。
+- Go：`encoding/json` 对 map 按键排序输出，必须自写保序序列化（结构体字段顺序或有序键切片）；且默认把 `< > &` 转义为 `\u003c` 等，必须 `enc.SetEscapeHTML(false)`，同时显式将 `/` 替换为 `\/`。
+- Java：用 `LinkedHashMap` + Jackson（`JsonWriteFeature.ESCAPE_NON_ASCII` 禁用）；默认序列化不转义 `/`，需显式将 `/` 替换为 `\/`。
 - 排序比较是字节/ASCII 序，不是 locale 序。
