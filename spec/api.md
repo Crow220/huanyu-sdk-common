@@ -20,6 +20,7 @@
 | mobile | string | 视配置 | 三要素之一，同上 |
 | remark | string | 选填 | 备注 |
 | merchant_order_no | string | 选填 | 限长255；**商户内唯一**（同商户重复单号建单返回错误，不同商户间可重复） |
+| callback_url | string | 选填 | 本单回调地址（http/https 合法 URL，限长255）；未设置时该订单回调发到商户默认回调地址。订单详情回显该字段 |
 
 成功 data 含 result_status: `success` | `pending_identity`（后者附 identity_url，用于引导补全客户身份信息）。
 
