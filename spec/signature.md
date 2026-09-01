@@ -59,3 +59,7 @@ api_key=mk_test_123&cny_amount=100.50&nonce=Ab3dEf7hIj9kLm2n&order_type=2&paymen
 - Java：用 `LinkedHashMap` + Jackson（`JsonWriteFeature.ESCAPE_NON_ASCII` 禁用）；默认序列化不转义 `/`，需显式将 `/` 替换为 `\/`；Jackson 默认也不转义 U+2028/U+2029，需在序列化输出上替换为 `\u2028`/`\u2029` 字面（替换安全：Jackson 输出中不存在这两类字符的转义字面形态）。Python 的 `json.dumps` 同样默认不转义，处理方式同 Java（在输出上替换）。
 - 排序比较是字节/ASCII 序，不是 locale 序。
 - PHP 参考实现的 `ksort` 为默认 `SORT_REGULAR`：纯数字键会被转为 int 按数值比较而非字节序；后端同此行为，可达参数域内等价，移植时保持与后端相同的排序语义即可。
+
+## 已知限制
+
+- **数组参数的叶子值不得为 null**。表单线路（`application/x-www-form-urlencoded` 的括号记法）无法承载 null——空值键 `payment_method[sub_bank]=` 会被服务端 `parse_str` 解析为空字符串，而签名时该叶子 JSON 化为 `null` 形态，两条路径无法对齐，验签必败。四个官方 SDK（PHP / Java / Go / Python）在此行为一致；商户对"未填"的叶子字段应传空字符串替代 null——嵌套空串在签名 JSON 化时原样保留（`"sub_bank":""`），上行线路也能以空值键形态到达，服务端重嵌套后两者对齐。顶层参数的 null / 空串按第 4 步跳过、不参与签名与上行，不受此限制。
