@@ -1,6 +1,6 @@
 # 签名算法规范（v1）
 
-本文件是寰宇（PISCES）商户平台签名算法的**语言无关真源**。四个官方 SDK（PHP / Java / Go / Python）的 `Signature` 实现必须与本规范逐步对应——下文算法步骤的**编号即契约**：SDK 实现注释、测试向量说明均引用这些编号，调整步骤或编号必须四仓同步并更新测试向量。
+本文件是PISCES商户平台签名算法的**语言无关真源**。四个官方 SDK（PHP / Java / Go / Python）的 `Signature` 实现必须与本规范逐步对应——下文算法步骤的**编号即契约**：SDK 实现注释、测试向量说明均引用这些编号，调整步骤或编号必须四仓同步并更新测试向量。
 
 - 提炼来源（权威参考实现）：`huanyu-backend/addons/huanyu/library/MerchantAuth.php`（请求签名/验签）、`huanyu-backend/addons/huanyu/service/Callback.php`（回调签名）。
 - 期望值真源：`vectors/signature_vectors.json`（请求签名）与 `vectors/callback_vectors.json`（回调验签），由 `tools/generate-vectors.php` 直接调用后端参考实现生成。本文示例仅为说明用途，若与向量冲突，以向量为准。
