@@ -2,7 +2,7 @@
 
 基础 URL：https://api.pisces-pay.cn/addons/huanyu（联调可换测试环境）
 通用参数（所有请求）：api_key / timestamp(秒，±300 秒有效窗口，服务端校验) / nonce(16位；时间窗内一次性，重复即拒绝"重复的请求，请更换 nonce 后重试") / signature
-响应信封：{code, msg, data, time}，code=1 成功。
+响应信封：{code, msg, data, time}。code 为数字（1=成功）；time **恒为字符串形式的秒级时间戳**（如 `"1788224754"`，TP5 服务端行为，见 `huanyu-backend/application/common/controller/Api.php` 的 result() 经 input() 输出），SDK 解析须同时兼容字符串形态（数字形态可作宽容兜底）。
 
 签名算法见 [signature.md](./signature.md)；本规格为四个官方 SDK（PHP / Java / Go / Python）端点方法的唯一依据，参数名与语义逐字对齐后端 `huanyu-backend/addons/huanyu/controller/Merchant.php`。
 
